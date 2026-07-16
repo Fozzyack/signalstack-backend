@@ -93,6 +93,7 @@ Shared internal notes visible to the IT team.
 ```text
 id UUID PRIMARY KEY
 request_id UUID REFERENCES requests(id) ON DELETE CASCADE
+author_id UUID REFERENCES users(id)
 body TEXT NOT NULL
 created_at TIMESTAMPTZ NOT NULL
 updated_at TIMESTAMPTZ NOT NULL
