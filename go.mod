@@ -8,6 +8,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/pressly/goose/v3 v3.27.2
 	github.com/rs/zerolog v1.35.1
+	golang.org/x/crypto v0.52.0
 )
 
 require (
