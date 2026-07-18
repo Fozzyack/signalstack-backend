@@ -10,6 +10,7 @@ import (
 
 type SessionStore interface {
 	CreateSession(ctx context.Context, userId string, token string) (*models.Session, error)
+	GetSessionByToken(ctx context.Context, token string) (*models.Session, error)
 }
 
 func NewSessionStore(db *sql.DB) SessionStore {
@@ -47,4 +48,26 @@ func (ps *PostgresStore) CreateSession(ctx context.Context, userId string, token
 	}
 
 	return createdSession, nil
+}
+
+func (ps *PostgresStore) GetSessionByToken(ctx context.Context, token string) (*models.Session, error) {
+	query := `
+		SELECT id, user_id, token, expires_at, created_at
+		FROM sessions
+		WHERE token = $1 AND expires_at > NOW()
+	`
+
+	session := &models.Session{}
+	err := ps.db.QueryRowContext(ctx, query, token).Scan(
+		&session.ID,
+		&session.UserID,
+		&session.Token,
+		&session.ExpiresAt,
+		&session.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return session, nil
 }

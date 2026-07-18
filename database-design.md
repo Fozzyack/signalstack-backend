@@ -42,7 +42,7 @@ An IT request submitted from the landing page.
 id UUID PRIMARY KEY
 reference TEXT UNIQUE NOT NULL       -- SS-1048
 title TEXT NOT NULL
-description TEXT NOT NULL
+nescription TEXT NOT NULL
 client_name TEXT NOT NULL
 client_email TEXT NOT NULL
 status TEXT NOT NULL                  -- new, in_progress, waiting, resolved, closed

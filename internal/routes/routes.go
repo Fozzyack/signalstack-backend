@@ -18,5 +18,8 @@ func SetupRoutes(app *app.Application) *chi.Mux {
 		AllowCredentials: false,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
+
+	r.With(CheckAuth(app))
+
 	return r
 }
