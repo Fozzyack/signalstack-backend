@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 
+	"github.com/rs/zerolog"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -13,9 +14,10 @@ func GenerateToken() string {
 	return hex.EncodeToString(slice)
 }
 
-func CheckPassword (input string, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(input), []byte(hash))
+func CheckPassword (input string, hash string, logger *zerolog.Logger) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(input))
 	if err != nil {
+		logger.Error().Err(err).Msg("Error checking password")
 		return false
 	}
 	return true

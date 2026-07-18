@@ -10,9 +10,6 @@ import (
 	"github.com/Fozzyack/signalstack-backend/internal/app"
 )
 
-type contextKey string
-
-
 
 func SendJSON(w http.ResponseWriter, payload any) {
 	w.Header().Set("Content-Type", "application/json")

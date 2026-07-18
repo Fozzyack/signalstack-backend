@@ -2,12 +2,19 @@ package routes
 
 import (
 	"github.com/Fozzyack/signalstack-backend/internal/app"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 )
 
 func SetupRoutes(app *app.Application) *chi.Mux {
 	r := chi.NewRouter()
+
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.RequestID)
+
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins: []string{"https://*", "http://*"},
@@ -19,7 +26,12 @@ func SetupRoutes(app *app.Application) *chi.Mux {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
-	r.With(CheckAuth(app))
+	r.Get("/health", app.HealthCheckHandler.HealthCheck)
+
+	r.Post("/auth/login", app.AuthHandler.Login)
+	r.With(CheckAuth(app)).Group(func(r chi.Router) {
+
+	})
 
 	return r
 }

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"database/sql"
 	"net/http"
 
@@ -27,13 +26,18 @@ func NewAuthHandler(logger *zerolog.Logger, userStore store.UserStore, sessionSt
 func (ah *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	ah.logger.Info().Msg("User Login Detected")
 	type loginRequest struct {
-		email    string
-		password string
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 	var req loginRequest
-	DecodeJSON(r, req)
+	err := DecodeJSON(r, &req)
+	if err != nil {
+		ah.logger.Error().Err(err).Msg("Error Decoding JSON")
+		ErrorJSON(w, 400, "Invalid JSON")
+		return
+	}
 
-	user, err := ah.userStore.GetUserByEmail(context.Background(), req.email)
+	user, err := ah.userStore.GetUserByEmail(r.Context(), req.Email)
 	if err == sql.ErrNoRows {
 		ah.logger.Error().Err(err).Msg("User not Found")
 		ErrorJSON(w, 404, "Incorrect Username Or Password")
@@ -45,14 +49,14 @@ func (ah *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !auth.CheckPassword(req.password, user.PasswordHash) {
-		ah.logger.Error().Err(err).Msg("Passwords do not match")
+	if !auth.CheckPassword(req.Password, user.PasswordHash, ah.logger) {
+		ah.logger.Error().Msg("Passwords do not match")
 		ErrorJSON(w, 404, "Incorrect Username Or Password")
 		return
 	}
 
 	token := auth.GenerateToken()
-	session, err := ah.sessionStore.CreateSession(context.Background(), user.ID, token)
+	session, err := ah.sessionStore.CreateSession(r.Context(), user.ID, token)
 	if err != nil {
 		ah.logger.Error().Err(err).Msg("Error Creating Session")
 		ErrorJSON(w, 500, "Internal Server Error on Login")
