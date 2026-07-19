@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"database/sql"
 	"net/http"
 
@@ -22,15 +21,15 @@ func NewRequestHandler(logger *zerolog.Logger, requestStore store.RequestStore) 
 }
 
 func (rh *RequestHandler) GetAllRequests(w http.ResponseWriter, r *http.Request) {
-	requests, err := rh.requestStore.GetRequests(context.Background())
-	if err != sql.ErrNoRows {
-		rh.logger.Error().Err(err).Msg("Could not get Requests")
-		ErrorJSON(w, 404, "No Requests Found")
+	requests, err := rh.requestStore.GetRequests(r.Context())
+	if err == sql.ErrNoRows {
+		rh.logger.Error().Err(err).Msg("No Requests found")
+		ErrorJSON(w, 404, "Not Found")
 		return
 	}
 	if err != nil {
 		rh.logger.Error().Err(err).Msg("Could not get Requests")
-		ErrorJSON(w, 500, "Internal Server Errror")
+		ErrorJSON(w, 500, "Internal Server Error")
 		return
 	}
 

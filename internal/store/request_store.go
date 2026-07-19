@@ -44,6 +44,11 @@ func (ps *PostgresStore) GetRequestById(ctx context.Context, id string) (*models
 		return nil, err
 	}
 
+	request.Assignments, err = ps.GetRequestAssignmentsByRequestID(ctx, request.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	return request, nil
 }
 
@@ -76,6 +81,11 @@ func (ps *PostgresStore) GetRequests(ctx context.Context) ([]*models.Request, er
 			&request.UpdatedAt,
 			&request.ResolvedAt,
 		)
+		if err != nil {
+			return nil, err
+		}
+
+		request.Assignments, err = ps.GetRequestAssignmentsByRequestID(ctx, request.ID)
 		if err != nil {
 			return nil, err
 		}

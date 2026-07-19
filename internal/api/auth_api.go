@@ -23,6 +23,10 @@ func NewAuthHandler(logger *zerolog.Logger, userStore store.UserStore, sessionSt
 	}
 }
 
+func (ah *AuthHandler) CheckAuth(w http.ResponseWriter, r *http.Request) {
+	SendJSON(w, map[string]string{"stat": "Successful Auth"})
+}
+
 func (ah *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	ah.logger.Info().Msg("User Login Detected")
 	type loginRequest struct {
