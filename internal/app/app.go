@@ -22,6 +22,7 @@ type Application struct {
 	AuthHandler        *api.AuthHandler
 	HealthCheckHandler *api.HealthCheckHandler
 	RequestHandler     *api.RequestHandler
+	UserHandler        *api.UserHandler
 }
 
 func NewApplication() (*Application, error) {
@@ -43,6 +44,7 @@ func NewApplication() (*Application, error) {
 	healthCheckHandler := api.NewHealthCheckHandler()
 	authHandler := api.NewAuthHandler(&logger, userStore, sessionStore)
 	requestsHandler := api.NewRequestHandler(&logger, requestsStore)
+	userHandler := api.NewUserHandler(&logger, userStore)
 
 	app := &Application{
 		Logger: logger,
@@ -55,6 +57,7 @@ func NewApplication() (*Application, error) {
 		AuthHandler:        authHandler,
 		HealthCheckHandler: healthCheckHandler,
 		RequestHandler:     requestsHandler,
+		UserHandler:        userHandler,
 	}
 
 	return app, nil

@@ -1,8 +1,11 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+
+	"github.com/Fozzyack/signalstack-backend/internal/models"
 )
 
 func SendJSON(w http.ResponseWriter, payload any) {
@@ -20,3 +23,6 @@ func ErrorJSON(w http.ResponseWriter, status int, message string) {
 	json.NewEncoder(w).Encode(map[string]string{"error": message})
 }
 
+func GetUserFromContext(ctx context.Context) *models.User {
+	return ctx.Value("authenticated_user").(*models.User)
+}
