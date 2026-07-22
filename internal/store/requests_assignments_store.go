@@ -8,6 +8,7 @@ import (
 )
 
 type RequestsAssignmentsStore interface {
+	GetAllRequestAssignments(ctx context.Context) ([]*models.RequestAssignment, error)
 	GetRequestAssignmentByID(ctx context.Context, id string) (*models.RequestAssignment, error)
 	GetRequestAssignmentsByRequestID(ctx context.Context, requestID string) ([]*models.RequestAssignment, error)
 	GetRequestAssignmentsByUserID(ctx context.Context, userID string) ([]*models.RequestAssignment, error)
@@ -42,6 +43,32 @@ func scanRequestAssignment(scanner interface{ Scan(...any) error }) (*models.Req
 		return nil, err
 	}
 	return assignment, nil
+}
+
+func (ps *PostgresStore) GetAllRequestAssignments(ctx context.Context) ([]*models.RequestAssignment, error) {
+	query := `
+		SELECT id, request_id, user_id, role, assigned_at, unassigned_at, personal_deadline, completed_at
+		FROM request_assignments
+	`
+
+	rows, err := ps.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	assignments := make([]*models.RequestAssignment, 0)
+	for rows.Next() {
+		assignment, err := scanRequestAssignment(rows)
+		if err != nil {
+			return nil, err
+		}
+		assignments = append(assignments, assignment)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return assignments, nil
 }
 
 func (ps *PostgresStore) GetRequestAssignmentByID(ctx context.Context, id string) (*models.RequestAssignment, error) {
@@ -116,6 +143,7 @@ func (ps *PostgresStore) UpdateRequestAssignment(ctx context.Context, id, role s
 		id,
 	))
 }
+
 
 func (ps *PostgresStore) UnassignRequestAssignment(ctx context.Context, id string) error {
 	result, err := ps.db.ExecContext(ctx, `

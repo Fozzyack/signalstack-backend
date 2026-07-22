@@ -15,14 +15,16 @@ type Application struct {
 	Logger zerolog.Logger
 	DB     *sql.DB
 
-	UserStore    store.UserStore
-	SessionStore store.SessionStore
-	RequestStore store.RequestStore
+	UserStore               store.UserStore
+	SessionStore            store.SessionStore
+	RequestStore            store.RequestStore
+	RequestAssignmentsStore store.RequestsAssignmentsStore
 
-	AuthHandler        *api.AuthHandler
-	HealthCheckHandler *api.HealthCheckHandler
-	RequestHandler     *api.RequestHandler
-	UserHandler        *api.UserHandler
+	AuthHandler              *api.AuthHandler
+	HealthCheckHandler       *api.HealthCheckHandler
+	RequestHandler           *api.RequestHandler
+	RequestAssignmentHandler *api.RequestAssignmentHandler
+	UserHandler              *api.UserHandler
 }
 
 func NewApplication() (*Application, error) {
@@ -40,24 +42,28 @@ func NewApplication() (*Application, error) {
 	userStore := store.NewUserStore(pgDb)
 	sessionStore := store.NewSessionStore(pgDb)
 	requestsStore := store.NewRequestStore(pgDb)
+	requestAssignmentsStore := store.NewRequestsAssignmentsStore(pgDb)
 
 	healthCheckHandler := api.NewHealthCheckHandler()
 	authHandler := api.NewAuthHandler(&logger, userStore, sessionStore)
 	requestsHandler := api.NewRequestHandler(&logger, requestsStore)
+	requestAssignmentHandler := api.NewRequestAssignmentHandler(&logger, requestAssignmentsStore, userStore)
 	userHandler := api.NewUserHandler(&logger, userStore)
 
 	app := &Application{
 		Logger: logger,
 		DB:     pgDb,
 
-		UserStore:    userStore,
-		SessionStore: sessionStore,
-		RequestStore: requestsStore,
+		UserStore:               userStore,
+		SessionStore:            sessionStore,
+		RequestStore:            requestsStore,
+		RequestAssignmentsStore: requestAssignmentsStore,
 
-		AuthHandler:        authHandler,
-		HealthCheckHandler: healthCheckHandler,
-		RequestHandler:     requestsHandler,
-		UserHandler:        userHandler,
+		AuthHandler:              authHandler,
+		HealthCheckHandler:       healthCheckHandler,
+		RequestHandler:           requestsHandler,
+		RequestAssignmentHandler: requestAssignmentHandler,
+		UserHandler:              userHandler,
 	}
 
 	return app, nil
