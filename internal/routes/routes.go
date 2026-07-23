@@ -30,10 +30,13 @@ func SetupRoutes(app *app.Application) *chi.Mux {
 
 	r.Post("/auth/login", app.AuthHandler.Login)
 	r.With(CheckAuth(app)).Group(func(r chi.Router) {
+
 		r.Get("/auth/check", app.AuthHandler.CheckAuth)
 		r.Get("/requests", app.RequestHandler.GetAllRequests)
 		r.Get("/request-assignments", app.RequestAssignmentHandler.GetAllRequestAssignments)
+
 		r.Get("/users/me", app.UserHandler.GetLoggedInUser)
+		r.Put("/users/me", app.UserHandler.UpdateUser)
 	})
 
 	return r
