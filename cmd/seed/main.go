@@ -64,6 +64,7 @@ func seed(db *sql.DB) error {
 		{Email: "james.doyle@signalstack.test", Name: "James Doyle"},
 		{Email: "rina.kapoor@signalstack.test", Name: "Rina Kapoor"},
 		{Email: "alex.lee@signalstack.test", Name: "Alex Lee"},
+		{Email: "priya.shah@signalstack.test", Name: "Priya Shah"},
 	}
 	userIDs := make(map[string]string, len(users))
 	for _, user := range users {
@@ -107,6 +108,22 @@ func seed(db *sql.DB) error {
 			ClientEmail: "devops@kiteworks.dev",
 			Status:      "waiting",
 		},
+		{
+			Reference:   "SS-1042",
+			Title:       "Harden administrator accounts with MFA",
+			Description: "The operations team needs help rolling out stronger sign-in controls for privileged accounts.",
+			ClientName:  "Granite Health",
+			ClientEmail: "it@granitehealth.example",
+			Status:      "in_progress",
+		},
+		{
+			Reference:   "SS-1041",
+			Title:       "Investigate suspicious mailbox forwarding rule",
+			Description: "A mailbox has an unexpected forwarding rule and needs an incident review.",
+			ClientName:  "Brightwell Partners",
+			ClientEmail: "security@brightwell.example",
+			Status:      "new",
+		},
 	}
 	requestIDs := make(map[string]string, len(requests))
 	for _, request := range requests {
@@ -126,6 +143,8 @@ func seed(db *sql.DB) error {
 		{requestReference: "SS-1045", userEmail: "james.doyle@signalstack.test", role: "lead"},
 		{requestReference: "SS-1045", userEmail: "rina.kapoor@signalstack.test", role: "contributor"},
 		{requestReference: "SS-1043", userEmail: "alex.lee@signalstack.test", role: "lead"},
+		{requestReference: "SS-1042", userEmail: "priya.shah@signalstack.test", role: "lead"},
+		{requestReference: "SS-1041", userEmail: "priya.shah@signalstack.test", role: "contributor"},
 	}
 	for _, assignment := range assignments {
 		if err := upsertAssignment(
