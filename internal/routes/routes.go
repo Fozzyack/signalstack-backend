@@ -37,6 +37,7 @@ func SetupRoutes(app *app.Application) *chi.Mux {
 
 		r.Get("/users/me", app.UserHandler.GetLoggedInUser)
 		r.Put("/users/me", app.UserHandler.UpdateUser)
+
 	})
 
 	return r
