@@ -121,6 +121,8 @@ func (ps *PostgresStore) CreateRequestAssignment(ctx context.Context, requestID,
 	query := `
 		INSERT INTO request_assignments (request_id, user_id, role)
 		VALUES ($1, $2, $3)
+		ON CONFLICT (request_id, user_id) WHERE unassigned_at IS NULL
+		DO UPDATE SET role = EXCLUDED.role
 		RETURNING ` + requestAssignmentColumns + `
 	`
 	return scanRequestAssignment(ps.db.QueryRowContext(ctx, query, requestID, userID, role))
@@ -143,7 +145,6 @@ func (ps *PostgresStore) UpdateRequestAssignment(ctx context.Context, id, role s
 		id,
 	))
 }
-
 
 func (ps *PostgresStore) UnassignRequestAssignment(ctx context.Context, id string) error {
 	result, err := ps.db.ExecContext(ctx, `

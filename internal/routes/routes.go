@@ -36,6 +36,7 @@ func SetupRoutes(app *app.Application) *chi.Mux {
 		r.Get("/requests", app.RequestHandler.GetAllRequests)
 
 		r.Get("/request-assignments", app.RequestAssignmentHandler.GetAllRequestAssignments)
+		r.Post("/request-assignments", app.RequestAssignmentHandler.CreateRequestAssignment)
 
 		r.Get("/users/me", app.UserHandler.GetLoggedInUser)
 		r.Put("/users/me", app.UserHandler.UpdateUser)

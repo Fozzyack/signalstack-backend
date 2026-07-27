@@ -24,6 +24,7 @@ func NewUserHandler(logger *zerolog.Logger, userStore store.UserStore) *UserHand
 func (uh *UserHandler) GetLoggedInUser(w http.ResponseWriter, r *http.Request) {
 
 	type userResponse struct {
+		ID    string `json:"id"`
 		Name  string `json:"name"`
 		Email string `json:"email"`
 	}
@@ -31,6 +32,7 @@ func (uh *UserHandler) GetLoggedInUser(w http.ResponseWriter, r *http.Request) {
 	user := GetUserFromContext(r.Context())
 
 	responsePayload := userResponse{
+		ID:    user.ID,
 		Name:  user.Name,
 		Email: user.Email,
 	}
