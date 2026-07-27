@@ -27,13 +27,13 @@ func SetupRoutes(app *app.Application) *chi.Mux {
 	}))
 
 	r.Get("/health", app.HealthCheckHandler.HealthCheck)
+	r.Post("/requests", app.RequestHandler.CreateRequest)
 
 	r.Post("/auth/login", app.AuthHandler.Login)
 	r.With(CheckAuth(app)).Group(func(r chi.Router) {
 
 		r.Get("/auth/check", app.AuthHandler.CheckAuth)
 		r.Get("/requests", app.RequestHandler.GetAllRequests)
-		r.Post("/requests", app.RequestHandler.CreateRequest)
 		r.Get("/request-assignments", app.RequestAssignmentHandler.GetAllRequestAssignments)
 
 		r.Get("/users/me", app.UserHandler.GetLoggedInUser)

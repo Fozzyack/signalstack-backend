@@ -40,8 +40,8 @@ func (rh *RequestHandler) CreateRequest(w http.ResponseWriter, r *http.Request) 
 	type newRequestType struct {
 		Title       string `json:"title"`
 		Description string `json:"description"`
-		Name        string `json:"name"`
-		Email       string `json:"email"`
+		Name        string `json:"clientName"`
+		Email       string `json:"clientEmail"`
 	}
 
 	newRequest := newRequestType{}

@@ -105,7 +105,7 @@ func (ps *PostgresStore) CreateRequest(ctx context.Context, title, description, 
 		INSERT INTO requests (
 			title, description, client_name, client_email
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id, reference, title, description, client_name, client_email,
 			status, created_at, updated_at, resolved_at
 	`
