@@ -19,6 +19,7 @@ type Application struct {
 	SessionStore            store.SessionStore
 	RequestStore            store.RequestStore
 	RequestAssignmentsStore store.RequestsAssignmentsStore
+	RequestEventStore       store.RequestEventStore
 
 	AuthHandler              *api.AuthHandler
 	HealthCheckHandler       *api.HealthCheckHandler
@@ -43,6 +44,7 @@ func NewApplication() (*Application, error) {
 	sessionStore := store.NewSessionStore(pgDb)
 	requestsStore := store.NewRequestStore(pgDb)
 	requestAssignmentsStore := store.NewRequestsAssignmentsStore(pgDb)
+	requestEventStore := store.NewRequestEventStore(pgDb)
 
 	healthCheckHandler := api.NewHealthCheckHandler()
 	authHandler := api.NewAuthHandler(&logger, userStore, sessionStore)
@@ -58,6 +60,7 @@ func NewApplication() (*Application, error) {
 		SessionStore:            sessionStore,
 		RequestStore:            requestsStore,
 		RequestAssignmentsStore: requestAssignmentsStore,
+		RequestEventStore:       requestEventStore,
 
 		AuthHandler:              authHandler,
 		HealthCheckHandler:       healthCheckHandler,
