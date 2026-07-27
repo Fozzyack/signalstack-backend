@@ -48,7 +48,8 @@ func NewApplication() (*Application, error) {
 
 	healthCheckHandler := api.NewHealthCheckHandler()
 	authHandler := api.NewAuthHandler(&logger, userStore, sessionStore)
-	requestsHandler := api.NewRequestHandler(&logger, requestsStore)
+	requestsHandler := api.NewRequestHandler(&logger, requestsStore, requestAssignmentsStore)
+
 	requestAssignmentHandler := api.NewRequestAssignmentHandler(&logger, requestAssignmentsStore, userStore)
 	userHandler := api.NewUserHandler(&logger, userStore)
 
