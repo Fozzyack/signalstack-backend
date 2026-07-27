@@ -10,7 +10,7 @@ import (
 type RequestStore interface {
 	GetRequestById(ctx context.Context, id string) (*models.Request, error)
 	GetRequests(ctx context.Context) ([]*models.Request, error)
-	CreateRequest(ctx context.Context, reference, title, description, clientName, clientEmail, status, createdAt, updatedAt, resolvedAt string) (*models.Request, error)
+	CreateRequest(ctx context.Context, title, description, clientName, clientEmail string) (*models.Request, error)
 	UpdateRequest(ctx context.Context, id, reference, title, description, clientName, clientEmail, status, resolvedAt string) (*models.Request, error)
 	DeleteRequest(ctx context.Context, id string) error
 }
@@ -99,16 +99,11 @@ func (ps *PostgresStore) GetRequests(ctx context.Context) ([]*models.Request, er
 	return requests, nil
 }
 
-func (ps *PostgresStore) CreateRequest(ctx context.Context, reference, title, description, clientName, clientEmail, status, createdAt, updatedAt, resolvedAt string) (*models.Request, error) {
-	var resolvedAtValue any
-	if resolvedAt != "" {
-		resolvedAtValue = resolvedAt
-	}
+func (ps *PostgresStore) CreateRequest(ctx context.Context, title, description, clientName, clientEmail string) (*models.Request, error) {
 
 	query := `
 		INSERT INTO requests (
-			reference, title, description, client_name, client_email, status,
-			created_at, updated_at, resolved_at
+			title, description, client_name, client_email
 		)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id, reference, title, description, client_name, client_email,
@@ -119,15 +114,10 @@ func (ps *PostgresStore) CreateRequest(ctx context.Context, reference, title, de
 	err := ps.db.QueryRowContext(
 		ctx,
 		query,
-		reference,
 		title,
 		description,
 		clientName,
 		clientEmail,
-		status,
-		createdAt,
-		updatedAt,
-		resolvedAtValue,
 	).Scan(
 		&request.ID,
 		&request.Reference,

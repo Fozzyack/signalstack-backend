@@ -18,7 +18,6 @@ type seedUser struct {
 }
 
 type seedRequest struct {
-	Reference   string
 	Title       string
 	Description string
 	ClientName  string
@@ -77,7 +76,6 @@ func seed(db *sql.DB) error {
 
 	requests := []seedRequest{
 		{
-			Reference:   "SS-1048",
 			Title:       "VPN access dropping every 20 minutes",
 			Description: "Remote warehouse team is losing access to internal tools during shifts.",
 			ClientName:  "Northstar Logistics",
@@ -85,7 +83,6 @@ func seed(db *sql.DB) error {
 			Status:      "new",
 		},
 		{
-			Reference:   "SS-1047",
 			Title:       "New starter account and laptop setup",
 			Description: "Three designers joining Monday need accounts, devices, and shared drive access.",
 			ClientName:  "Arc & Field Studio",
@@ -93,7 +90,6 @@ func seed(db *sql.DB) error {
 			Status:      "new",
 		},
 		{
-			Reference:   "SS-1045",
 			Title:       "Review permissions for finance shared drive",
 			Description: "Quarterly access review requested before the external audit begins.",
 			ClientName:  "Verity & Co",
@@ -101,7 +97,6 @@ func seed(db *sql.DB) error {
 			Status:      "in_progress",
 		},
 		{
-			Reference:   "SS-1043",
 			Title:       "Move production database to managed cloud",
 			Description: "Looking for a migration plan and someone to own the first phase.",
 			ClientName:  "Kiteworks",
@@ -109,7 +104,6 @@ func seed(db *sql.DB) error {
 			Status:      "waiting",
 		},
 		{
-			Reference:   "SS-1042",
 			Title:       "Harden administrator accounts with MFA",
 			Description: "The operations team needs help rolling out stronger sign-in controls for privileged accounts.",
 			ClientName:  "Granite Health",
@@ -117,7 +111,6 @@ func seed(db *sql.DB) error {
 			Status:      "in_progress",
 		},
 		{
-			Reference:   "SS-1041",
 			Title:       "Investigate suspicious mailbox forwarding rule",
 			Description: "A mailbox has an unexpected forwarding rule and needs an incident review.",
 			ClientName:  "Brightwell Partners",
@@ -131,25 +124,25 @@ func seed(db *sql.DB) error {
 		if err != nil {
 			return err
 		}
-		requestIDs[request.Reference] = id
+		requestIDs[request.Title] = id
 	}
 
 	assignments := []struct {
-		requestReference string
-		userEmail        string
-		role             string
+		requestTitle string
+		userEmail    string
+		role         string
 	}{
-		{requestReference: "SS-1048", userEmail: "maya.chen@signalstack.test", role: "lead"},
-		{requestReference: "SS-1045", userEmail: "james.doyle@signalstack.test", role: "lead"},
-		{requestReference: "SS-1045", userEmail: "rina.kapoor@signalstack.test", role: "contributor"},
-		{requestReference: "SS-1043", userEmail: "alex.lee@signalstack.test", role: "lead"},
-		{requestReference: "SS-1042", userEmail: "priya.shah@signalstack.test", role: "lead"},
-		{requestReference: "SS-1041", userEmail: "priya.shah@signalstack.test", role: "contributor"},
+		{requestTitle: "VPN access dropping every 20 minutes", userEmail: "maya.chen@signalstack.test", role: "lead"},
+		{requestTitle: "Review permissions for finance shared drive", userEmail: "james.doyle@signalstack.test", role: "lead"},
+		{requestTitle: "Review permissions for finance shared drive", userEmail: "rina.kapoor@signalstack.test", role: "contributor"},
+		{requestTitle: "Move production database to managed cloud", userEmail: "alex.lee@signalstack.test", role: "lead"},
+		{requestTitle: "Harden administrator accounts with MFA", userEmail: "priya.shah@signalstack.test", role: "lead"},
+		{requestTitle: "Investigate suspicious mailbox forwarding rule", userEmail: "priya.shah@signalstack.test", role: "contributor"},
 	}
 	for _, assignment := range assignments {
 		if err := upsertAssignment(
 			tx,
-			requestIDs[assignment.requestReference],
+			requestIDs[assignment.requestTitle],
 			userIDs[assignment.userEmail],
 			assignment.role,
 		); err != nil {
@@ -177,19 +170,28 @@ func upsertUser(tx *sql.Tx, user seedUser, passwordHash string) (string, error) 
 func upsertRequest(tx *sql.Tx, request seedRequest) (string, error) {
 	var id string
 	err := tx.QueryRow(`
-		INSERT INTO requests (reference, title, description, client_name, client_email, status)
-		VALUES ($1, $2, $3, $4, $5, $6)
-		ON CONFLICT (reference) DO UPDATE SET
-			title = EXCLUDED.title,
-			description = EXCLUDED.description,
-			client_name = EXCLUDED.client_name,
-			client_email = EXCLUDED.client_email,
-			status = EXCLUDED.status,
+		UPDATE requests
+		SET description = $1,
+			client_name = $2,
+			status = $3,
 			updated_at = NOW()
+		WHERE title = $4 AND client_email = $5
 		RETURNING id
-	`, request.Reference, request.Title, request.Description, request.ClientName, request.ClientEmail, request.Status).Scan(&id)
+	`, request.Description, request.ClientName, request.Status, request.Title, request.ClientEmail).Scan(&id)
+	if err == nil {
+		return id, nil
+	}
+	if err != sql.ErrNoRows {
+		return "", fmt.Errorf("update seed request %s: %w", request.Title, err)
+	}
+
+	err = tx.QueryRow(`
+		INSERT INTO requests (title, description, client_name, client_email, status)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id
+	`, request.Title, request.Description, request.ClientName, request.ClientEmail, request.Status).Scan(&id)
 	if err != nil {
-		return "", fmt.Errorf("upsert request %s: %w", request.Reference, err)
+		return "", fmt.Errorf("insert seed request %s: %w", request.Title, err)
 	}
 	return id, nil
 }

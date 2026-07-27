@@ -35,3 +35,49 @@ func (rh *RequestHandler) GetAllRequests(w http.ResponseWriter, r *http.Request)
 
 	SendJSON(w, requests)
 }
+
+func (rh *RequestHandler) CreateRequest(w http.ResponseWriter, r *http.Request) {
+	type newRequestType struct {
+		Title       string `json:"title"`
+		Description string `json:"description"`
+		Name        string `json:"name"`
+		Email       string `json:"email"`
+	}
+
+	newRequest := newRequestType{}
+	DecodeJSON(r, &newRequest)
+	rh.logger.Info().Msg("Request Created")
+	request, err := rh.requestStore.CreateRequest(r.Context(), newRequest.Title, newRequest.Description, newRequest.Name, newRequest.Email)
+	if err != nil {
+		rh.logger.Error().Err(err).Msg("Could not create Request")
+		ErrorJSON(w, 500, "Internal Server Error")
+		return
+	}
+
+	// Extra logic here for
+	// Sending email
+	// Adding tags
+
+	SendJSON(w, request)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

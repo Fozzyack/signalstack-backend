@@ -45,7 +45,7 @@ title TEXT NOT NULL
 nescription TEXT NOT NULL
 client_name TEXT NOT NULL
 client_email TEXT NOT NULL
-status TEXT NOT NULL                  -- new, in_progress, waiting, resolved, closed
+status TEXT NOT NULL                  -- new, pending, in_progress, waiting, resolved, closed
 created_at TIMESTAMPTZ NOT NULL
 updated_at TIMESTAMPTZ NOT NULL
 resolved_at TIMESTAMPTZ
